@@ -165,13 +165,14 @@ SELECT * FROM bbq WHERE 업소명 IN('BBQ치킨', 'BHC치킨', '교촌치킨') O
 
 SELECT 업소명, count(*) FROM bbq WHERE 업소명 = '교촌치킨';
 
-SELECT 업소명, count(*) AS 업소의개수 FROM bbq GROUP BY 업소명 HAVING = 'BBQ치킨', 'BHC치킨', '교촌치킨';
-
 SELECT 업소명, count(*) AS 업소개수 FROM bbq 
 GROUP BY 업소명
 ORDER BY 업소개수 DESC;
 
-
+# INDEX - 테이블에서 원하는 컬럼의 데이터를 빠르게 찾을 수 있도록 하는 스키마
+# CREATE INDEX 인덱스명 ON 테이블명 (컬럼, ...);
+CREATE INDEX bbq_업소명_idx ON bbq (업소명);
+CREATE INDEX bbq_위치_idx ON bbq (위도, 경도);
 
 
 

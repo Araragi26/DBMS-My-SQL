@@ -159,7 +159,97 @@ GROUP BY B.board_number
 
 ON T1.board_number = T3.board_number
 ORDER BY T3.favorite_count DESC
-LIMIT 3                          ;
+LIMIT 3;
+
+# 검색 결과 리스트 불러오기 SQL
+
+SELECT 
+	T1.board_number, T1.title, T1.contents,
+    T1.image_url, T1.writer_datetime, T1.view_count,
+    T1.profile_image, T1.nickname,
+    T2.comment_count,
+    T3.favorite_count
+FROM (
+	SELECT
+	B.board_number, B.title, B.contents,
+    B.image_url, B.writer_datetime, B.view_count,
+    U.profile_image, U.nickname
+FROM board AS B 
+INNER JOIN user AS U
+ON B.writer_email = U.Email
+) 
+AS T1 INNER JOIN
+(
+SELECT B.board_number, count(C.user_email) AS comment_count
+FROM board AS B
+LEFT JOIN comment AS C
+ON B.board_number = C.board_number
+GROUP BY B.board_number
+) 
+AS T2
+ON T1.board_number = T2.board_number
+LEFT JOIN
+(
+SELECT B.board_number, count(F.user_email) AS favorite_count
+FROM board AS B 
+LEFT JOIN favorite AS F
+ON B.board_number = F.board_number
+GROUP BY B.board_number
+) AS T3
+
+ON T1.board_number = T3.board_number
+WHERE title LIKE '%제목%'
+ORDER BY T1.writer_datetime DESC;
+
+# VIEW - 읽기 전용의 가상의 테이블
+# 물리적으로 존재하는 테이블이 아니기 떄문에 입력, 수정, 삭제를 진행할 수 없음
+# 자주 사용되는 복잡한 SELECT 쿼리를 미리 작성하여 테이블처럼 만들어 둔 것
+
+# CREATE VIEW 뷰이름 AS SELECT ...
+CREATE VIEW board_view AS SELECT 
+	T1.board_number, T1.title, T1.contents,
+    T1.image_url, T1.writer_datetime, T1.view_count,
+    T1.profile_image, T1.nickname,
+    T2.comment_count,
+    T3.favorite_count
+FROM (
+	SELECT
+	B.board_number, B.title, B.contents,
+    B.image_url, B.writer_datetime, B.view_count,
+    U.profile_image, U.nickname
+FROM board AS B 
+INNER JOIN user AS U
+ON B.writer_email = U.Email
+) 
+AS T1 INNER JOIN
+(
+SELECT B.board_number, count(C.user_email) AS comment_count
+FROM board AS B
+LEFT JOIN comment AS C
+ON B.board_number = C.board_number
+GROUP BY B.board_number
+) 
+AS T2
+ON T1.board_number = T2.board_number
+LEFT JOIN
+(
+SELECT B.board_number, count(F.user_email) AS favorite_count
+FROM board AS B 
+LEFT JOIN favorite AS F
+ON B.board_number = F.board_number
+GROUP BY B.board_number
+) AS T3
+
+ON T1.board_number = T3.board_number;
+
+# 최신 게시물 불러오기 SQL 3
+SELECT * FROM board_view
+ORDER BY writer_datetime DESC;
+
+# 특정 유전 게시물 불러오기 SQL
+SELECT * FROM board_view 
+WHERE nickname = 'nickname';
+
 
 
 
